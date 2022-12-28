@@ -103,6 +103,18 @@ except Exception as e:
 print('Min lot size for',symbol,'is:',min_trading_qty)
 print('Max leverage is:',leverage)
 
+custom_leverage = input('Set custom leverage? ')
+
+try:
+    client.set_leverage(
+        symbol=symbol,
+        buy_leverage=custom_leverage,
+        sell_leverage=custom_leverage,
+    )
+    print('Max leverage set to ', custom_leverage)
+
+except:
+    print("Leverage not modified")
 
 try:
     get_balance()
@@ -121,74 +133,74 @@ except Exception as e:
     print(line_number, 'exeception: {}'.format(e))
 
 
-what_1x_is = round((float(equity) / float(ask)) / (100 / float(leverage)),2)
+def trade_size():
+    global lot_trade_size
+    lot_trade_size=float(input("What lot size to trade (lot x price): "))
 
-print('        1x size:',what_1x_is)
-print('        0.1x is:',what_1x_is/10)
-print('          0.01x:',what_1x_is/100)
-
-min_lot_size = input('What size to trade? ')
-
+trade_size()
 
 started = datetime.datetime.now().strftime('%H:%M:%S')
 
 
 def cancel_entry_orders():
     orders = client.get_active_order(symbol=symbol)
-    for order in orders['result']['data']:
-        if order['order_status'] != 'Filled' and order['side'] == 'Sell' and order['order_status'] != 'Cancelled' and order['reduce_only'] == False:     
-            client.cancel_active_order(symbol=symbol, order_id=order['order_id'])
-        elif order['order_status'] != 'Filled' and order['side'] == 'Buy' and order['order_status'] != 'Cancelled' and order['reduce_only'] == False:
-            client.cancel_active_order(symbol=symbol, order_id=order['order_id'])
+    if isinstance(orders['result']['data'], list):
+        for order in orders['result']['data']:
+            if order['order_status'] != 'Filled' and order['side'] == 'Sell' and order['order_status'] != 'Cancelled' and order['reduce_only'] == False:     
+                client.cancel_active_order(symbol=symbol, order_id=order['order_id'])
+            elif order['order_status'] != 'Filled' and order['side'] == 'Buy' and order['order_status'] != 'Cancelled' and order['reduce_only'] == False:
+                client.cancel_active_order(symbol=symbol, order_id=order['order_id'])
 
         
 def cancel_close_orders():
     orders = client.get_active_order(symbol=symbol)
-    for order in orders['result']['data']:
-        if order['order_status'] != 'Filled' and order['side'] == 'Buy' and order['order_status'] != 'Cancelled' and order['reduce_only'] == True:
-            client.cancel_active_order(symbol=symbol, order_id=order['order_id'])
-        elif order['order_status'] != 'Filled' and order['side'] == 'Sell' and order['order_status'] != 'Cancelled' and order['reduce_only'] == True:
-            client.cancel_active_order(symbol=symbol, order_id=order['order_id'])
+    if isinstance(orders['result']['data'], list):
+        for order in orders['result']['data']:
+            if order['order_status'] != 'Filled' and order['side'] == 'Buy' and order['order_status'] != 'Cancelled' and order['reduce_only'] == True:
+                client.cancel_active_order(symbol=symbol, order_id=order['order_id'])
+            elif order['order_status'] != 'Filled' and order['side'] == 'Sell' and order['order_status'] != 'Cancelled' and order['reduce_only'] == True:
+                client.cancel_active_order(symbol=symbol, order_id=order['order_id'])
 
 
 def get_close_orders():
     orders = client.get_active_order(symbol=symbol,limit=200)
 
     # print(orders)
+    if isinstance(orders['result']['data'], list):
 
-    for order in orders['result']['data']:
+        for order in orders['result']['data']:
 
-        global tp_buy_order_size
-        global tp_buy_order_id
-        global tp_buy_order_prc
-        global tp_sell_order_size
-        global tp_sell_order_id
-        global tp_sell_order_prc
-        
-        if order['order_status'] == 'New' and order['order_status'] and order['order_status'] != 'Filled' and order['side'] == "Buy" and order['reduce_only'] == True:
+            global tp_buy_order_size
+            global tp_buy_order_id
+            global tp_buy_order_prc
+            global tp_sell_order_size
+            global tp_sell_order_id
+            global tp_sell_order_prc
+            
+            if order['order_status'] == 'New' and order['order_status'] and order['order_status'] != 'Filled' and order['side'] == "Buy" and order['reduce_only'] == True:
 
-            tp_buy_order_size = order['qty']
-            tp_buy_order_id = order['order_id']
-            tp_buy_order_prc = order['price']
+                tp_buy_order_size = order['qty']
+                tp_buy_order_id = order['order_id']
+                tp_buy_order_prc = order['price']
 
-            print('│     Buy Close order:',tp_buy_order_size, tp_buy_order_prc)
-        
-        else:
-            # print('No Close Buy orders found')
-            pass
+                print('│     Buy Close order:',tp_buy_order_size, tp_buy_order_prc)
+            
+            else:
+                # print('No Close Buy orders found')
+                pass
 
 
-        if order['order_status'] == 'New' and order['order_status'] and order['order_status'] != 'Filled' and order['side'] == "Sell" and order['reduce_only'] == True:
+            if order['order_status'] == 'New' and order['order_status'] and order['order_status'] != 'Filled' and order['side'] == "Sell" and order['reduce_only'] == True:
 
-            tp_sell_order_size = order['qty']
-            tp_sell_order_id = order['order_id']
-            tp_sell_order_prc = order['price']
+                tp_sell_order_size = order['qty']
+                tp_sell_order_id = order['order_id']
+                tp_sell_order_prc = order['price']
 
-            print('│     Sell Close order:',tp_sell_order_size, tp_sell_order_prc)
-        
-        else:
-            # print('No Close Sell orders found')
-            pass
+                print('│     Sell Close order:',tp_sell_order_size, tp_sell_order_prc)
+            
+            else:
+                # print('No Close Sell orders found')
+                pass
 
 
 try:
@@ -349,19 +361,19 @@ while True:
         get_ema_3_5_high_bybit()
         time.sleep(0.01)
         get_ema_3_5_low_bybit()
-        get_ema_60_5_binance()
+        # get_ema_60_5_binance()
         time.sleep(0.01)
-        get_ema_120_5_binance()
+        # get_ema_120_5_binance()
         time.sleep(0.01)
-        get_ema_240_5_binance()
+        # get_ema_240_5_binance()
         get_ema_3_1_high_bybit()
         time.sleep(0.01)
         get_ema_3_1_low_bybit()
-        get_ema_60_1_binance()
+        # get_ema_60_1_binance()
         time.sleep(0.01)
-        get_ema_120_1_binance()
+        # get_ema_120_1_binance()
         time.sleep(0.01)
-        get_ema_240_1_binance()
+        # get_ema_240_1_binance()
         get_ema_6_5_high_bybit()
         time.sleep(0.01)
         get_ema_6_1_high_bybit()
@@ -413,8 +425,7 @@ while True:
         pass
 
 
-    what_1x_is = round((float(equity) / float(ask)) / (100 / float(leverage)),2)
-    max_size = what_1x_is
+    max_size = 1000
 
 
     print('╭─────────────────────────────────────────────╮')
@@ -422,7 +433,7 @@ while True:
     print('├─────────────────────────────────────────────┤')
     print('│               Asset:',symbol)
     print('│        Max leverage:',leverage)
-    print('│            Lot size:',min_lot_size,'| 1x:',what_1x_is)
+    print('│            Lot size:',lot_trade_size)
     print('├─────────────────────────────────────────────┤')
 
     if enable_trading == '1':
@@ -475,7 +486,7 @@ while True:
             side='Sell',\
             symbol=symbol,\
             order_type='Market',\
-            qty=min_lot_size,\
+            qty=lot_trade_size,\
             time_in_force='GoodTillCancel',\
             reduce_only=False,\
             close_on_trigger=False)
@@ -584,7 +595,7 @@ while True:
             symbol=symbol,\
             order_type='Limit',\
             price=ask,\
-            qty=min_lot_size,\
+            qty=lot_trade_size,\
             time_in_force='GoodTillCancel',\
             reduce_only=False,\
             close_on_trigger=False)
@@ -622,4 +633,4 @@ while True:
     else:
         print('│ Ask < EMA3 on 5m')
 
-    time.sleep(0.02)
+    time.sleep(0.5)
