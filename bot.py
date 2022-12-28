@@ -34,6 +34,7 @@ exchange = ccxt.bybit({'apiKey':api_key,'secret':api_secret})
 binance_client = Client(binance_api_key, binance_api_secret)
 client = usdt_perpetual.HTTP(endpoint=endpoint,api_key=api_key,api_secret=api_secret)
 
+exchange.options['adjustForTimeDifference'] = True
 
 enable_trading = input('Enable Trading? (0 - Disable, 1 - Enable) ')
 symbol = input('What Asset To trade? ')
@@ -50,16 +51,19 @@ def get_linenumber():
     
 def get_balance():
     my_balance = exchange.fetchBalance()
+    for x in my_balance['info']['result']['list']:
+        if x.get('coin') == 'USDT':
+            usdtobject = x
     global available_balance
     global realised_pnl
     global equity
     global wallet_balance
     global unrealised_pnl
-    available_balance = float(my_balance['info']['result']['USDT']['available_balance'])
-    realised_pnl = my_balance['info']['result']['USDT']['realised_pnl']
-    unrealised_pnl = my_balance['info']['result']['USDT']['unrealised_pnl']
-    wallet_balance = my_balance['info']['result']['USDT']['wallet_balance']
-    equity = my_balance['info']['result']['USDT']['equity']
+    available_balance = float(usdtobject['availableBalance'])
+    realised_pnl = usdtobject['cumRealisedPnl']
+    unrealised_pnl = usdtobject['unrealisedPnl']
+    wallet_balance = usdtobject['walletBalance']
+    equity = usdtobject['equity']
 
 
 def get_orderbook():
