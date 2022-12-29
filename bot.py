@@ -388,14 +388,14 @@ while True:
         pass
 
 
-    ma_order_long_1m = ema_60_1_binance < ema_120_1_binance and ema_120_1_binance < ema_240_1_binance and ema_3_1_high_bybit < ema_60_1_binance
-    ma_order_long_5m = ema_60_5_binance < ema_120_5_binance and ema_120_5_binance < ema_240_5_binance and ema_3_5_high_bybit < ema_60_5_binance
+    # ma_order_long_1m = ema_60_1_binance < ema_120_1_binance and ema_120_1_binance < ema_240_1_binance and ema_3_1_high_bybit < ema_60_1_binance
+    # ma_order_long_5m = ema_60_5_binance < ema_120_5_binance and ema_120_5_binance < ema_240_5_binance and ema_3_5_high_bybit < ema_60_5_binance
     
-    ma_order_shrt_1m = ema_60_1_binance > ema_120_1_binance and ema_120_1_binance > ema_240_1_binance and ema_3_1_low_bybit > ema_60_1_binance
-    ma_order_shrt_5m = ema_60_5_binance > ema_120_5_binance and ema_120_5_binance > ema_240_5_binance and ema_3_5_low_bybit > ema_60_5_binance
+    # ma_order_shrt_1m = ema_60_1_binance > ema_120_1_binance and ema_120_1_binance > ema_240_1_binance and ema_3_1_low_bybit > ema_60_1_binance
+    # ma_order_shrt_5m = ema_60_5_binance > ema_120_5_binance and ema_120_5_binance > ema_240_5_binance and ema_3_5_low_bybit > ema_60_5_binance
 
-    good_ma_order_long = ma_order_long_1m == True and ma_order_long_5m == True
-    good_ma_order_shrt = ma_order_shrt_1m == True and ma_order_shrt_5m == True
+    # good_ma_order_long = ma_order_long_1m == True and ma_order_long_5m == True
+    # good_ma_order_shrt = ma_order_shrt_1m == True and ma_order_shrt_5m == True
 
 
     try:
@@ -406,10 +406,11 @@ while True:
         print(line_number, 'exeception: {}'.format(e))
         pass
 
+    global ema_3_1_high_bybit
 
-    good_shrt_conditions = good_ma_order_shrt == True and ask > ema_3_5_high_bybit and ask > ema_3_1_high_bybit
+    # good_shrt_conditions = good_ma_order_shrt == True and ask > ema_3_5_high_bybit and ask > ema_3_1_high_bybit
     # good_long_conditions = good_ma_order_long == True and bid < ema_3_5_low_bybit and bid < ema_3_1_low_bybit
-    good_long_conditions = good_ma_order_long == True and ask > ema_3_5_high_bybit and ask > ema_3_1_high_bybit
+    # good_long_conditions = good_ma_order_long == True and ask > ema_3_5_high_bybit and ask > ema_3_1_high_bybit
 
 
     # good_trade_conditions = good_shrt_conditions == True or good_long_conditions == True
@@ -611,15 +612,15 @@ while True:
     
     print('├─────────────────────────────────────────────┤')
     
-    if ma_order_shrt_1m == True:
-        print(Fore.RED +'│ MA order Short 1m - OK'+ Style.RESET_ALL)
-    else:
-        print('│ MA order Short 1m - Not OK')
+    # if ma_order_shrt_1m == True:
+    #     print(Fore.RED +'│ MA order Short 1m - OK'+ Style.RESET_ALL)
+    # else:
+    #     print('│ MA order Short 1m - Not OK')
 
-    if ma_order_shrt_5m == True:
-        print(Fore.RED +'│ MA order Short 5m - OK'+ Style.RESET_ALL)
-    else:
-        print('│ MA order Short 5m - Not OK')
+    # if ma_order_shrt_5m == True:
+    #     print(Fore.RED +'│ MA order Short 5m - OK'+ Style.RESET_ALL)
+    # else:
+    #     print('│ MA order Short 5m - Not OK')
 
     print('├─────────────────────────────────────────────┤')
 
