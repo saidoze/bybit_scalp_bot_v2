@@ -28,7 +28,7 @@ from pybit import usdt_perpetual
 from binance.client import Client
 from colorama import init, Fore, Back, Style
 
-
+init(convert=True) # Fix colors in console
 
 exchange = ccxt.bybit({'apiKey':api_key,'secret':api_secret})
 binance_client = Client(binance_api_key, binance_api_secret)
