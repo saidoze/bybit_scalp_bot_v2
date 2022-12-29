@@ -20,13 +20,13 @@ import json
 import uuid
 import random
 import sqlite3
-import datetime
 import pandas as pd
 from config import *
 from inspect import currentframe
 from pybit import usdt_perpetual
 from binance.client import Client
 from colorama import init, Fore, Back, Style
+from datetime import datetime
 
 init(convert=True) # Fix colors in console
 
@@ -37,6 +37,7 @@ client = usdt_perpetual.HTTP(endpoint=endpoint,api_key=api_key,api_secret=api_se
 exchange.options['adjustForTimeDifference'] = True
 
 enable_trading = input('Enable Trading? (0 - Disable, 1 - Enable) ')
+enable_lifebeat_files = input('Enable Lifebeat? (0 - Disable, 1 - Enable) ')
 symbol = input('What Asset To trade? ')
 symbol = (symbol+'USDT').upper()
 
@@ -138,9 +139,6 @@ def trade_size():
     lot_trade_size=float(input("What lot size to trade (lot x price): "))
 
 trade_size()
-
-started = datetime.datetime.now().strftime('%H:%M:%S')
-
 
 def cancel_entry_orders():
     orders = client.get_active_order(symbol=symbol)
@@ -351,11 +349,38 @@ def get_position():
             buy_position_size = position['size']
             buy_position_prce = position['entry_price']
 
+#------------------------------
+
+def remove_lifebeat_files():
+    root = lifebeat_directory
+    one_hour_ago = time.time() - (3600)
+    for i in os.listdir(root):
+        path = os.path.join(root, i)
+        if os.stat(path).st_mtime < one_hour_ago:
+                if os.path.isfile(path):
+                    os.remove(path)
+
+def write_lifebeat():
+    remove_lifebeat_files()
+    now = datetime.now()
+    global previous_starttime
+    diff = now - previous_starttime
+    if diff.seconds > 30:
+        datetime_now_string = now.strftime("%Y%m%d%H%M%S")
+        with open(lifebeat_directory + datetime_now_string + ".txt",'w',encoding = 'utf-8') as f:
+            f.write(datetime_now_string)
+        previous_starttime = now
+
 ####################################################################################### Start
+
+global previous_starttime
+previous_starttime = datetime.now()
 
 
 while True:
-
+    if enable_lifebeat_files == '1':
+        write_lifebeat()
+    
     try:
         # Get EMAs
         get_ema_3_5_high_bybit()

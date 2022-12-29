@@ -8,3 +8,6 @@ binance_api_secret = ''
 
 endpoint = 'https://api.bybit.com'
 domain = 'bybit'
+
+# General
+lifebeat_directory = 'lifebeat\\'
