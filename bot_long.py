@@ -431,7 +431,7 @@ while True:
         print(line_number, 'exeception: {}'.format(e))
         pass
 
-    global ema_3_1_high_bybit
+    global ema_3_1_low_bybit
 
     # good_shrt_conditions = good_ma_order_shrt == True and ask > ema_3_5_high_bybit and ask > ema_3_1_high_bybit
     # good_long_conditions = good_ma_order_long == True and bid < ema_3_5_low_bybit and bid < ema_3_1_low_bybit
@@ -439,7 +439,7 @@ while True:
 
 
     # good_trade_conditions = good_shrt_conditions == True or good_long_conditions == True
-    good_short_trade_conditions = ask > ema_3_1_high_bybit
+    good_long_trade_conditions = bid < ema_3_1_low_bybit
 
 
     try:
@@ -480,7 +480,7 @@ while True:
     print('│      UnRealized PnL:',unrealised_pnl)
     print(Fore.GREEN +'│              Profit:',profit,'%'+ Style.RESET_ALL)
     print('├─────────────────────────────────────────────┤')
-    print('│                 Ask:',ask)
+    print('│                 Bid:',bid)
     print('│ MA 3 High/Low on 5m:',ema_3_5_high_bybit,'/',ema_3_5_low_bybit)
     print('│ MA 3 High/Low on 1m:',ema_3_1_high_bybit,'/',ema_3_1_low_bybit)
 
@@ -494,22 +494,22 @@ while True:
         pass
 
 
-    print('├─────────────────────────────────────────────┤')
-    print('│  Sell Position Size:',sell_position_size) 
-    print('│ Sell Position Price:',sell_position_prce)
     # print('├─────────────────────────────────────────────┤')
-    # print('│   Buy Position Size:',buy_position_size) 
-    # print('│  Buy Position Price:',buy_position_prce)
+    # print('│  Sell Position Size:',sell_position_size) 
+    # print('│ Sell Position Price:',sell_position_prce)
+    print('├─────────────────────────────────────────────┤')
+    print('│   Buy Position Size:',buy_position_size) 
+    print('│  Buy Position Price:',buy_position_prce)
     print('├─────────────────────────────────────────────┤')
 
 
-    ''' First Short entry '''
+    ''' First Long entry '''
 
-    if enable_trading == '1' and sell_position_size == 0 and sell_position_size < max_size and good_short_trade_conditions == True:
+    if enable_trading == '1' and buy_position_size == 0 and buy_position_size < max_size and good_long_trade_conditions == True:
 
         try:
             place_first_entry_market_order = client.place_active_order(\
-            side='Sell',\
+            side='Buy',\
             symbol=symbol,\
             order_type='Market',\
             qty=lot_trade_size,\
@@ -528,7 +528,7 @@ while True:
     
     ''' Cancel Entry order '''
 
-    if float(ask) < float(ema_3_1_high_bybit) or float(ask) < float(ema_3_5_high_bybit):
+    if float(bid) > float(ema_3_1_low_bybit) or float(bid) > float(ema_3_5_low_bybit):
         
         try:
             cancel_entry_orders()
@@ -539,14 +539,14 @@ while True:
             pass
 
 
-    ''' Take Profit for Short'''
+    ''' Take Profit for Long'''
 
-    if sell_position_size > 0:
+    if buy_position_size > 0:
 
         # percent_to_remove = 100 - tp_perc
         # sell_tp_price = round(sell_position_prce * percent_to_remove / 100,decimals)
 
-        sell_tp_price = round(sell_position_prce-(ema_6_5_high_bybit - ema_6_5_low_bybit),decimals)
+        buy_tp_price = round(buy_position_prce+(ema_6_5_high_bybit - ema_6_5_low_bybit),decimals)
         # Eg. APE: 3.618- (3.620 - 3.622) -> 3.616
         # sell_tp_price = round(sell_position_prce-(ema_6_1_high_bybit - ema_6_1_low_bybit),decimals)
 
@@ -563,14 +563,14 @@ while True:
             pass
 
         print('│ MA 6 High/Low on 5m:',ema_6_5_high_bybit,'/',ema_6_5_low_bybit)
-        print('│  ',sell_tp_price)
+        print('│  ',buy_tp_price)
         print('│  ',tp_buy_order_prc)
 
 
         # time.sleep(333)
 
         
-        if tp_buy_order_prc != sell_tp_price or tp_buy_order_size != sell_position_size:
+        if tp_buy_order_prc != buy_tp_price or tp_buy_order_size != buy_position_size:
 
             try:
                 cancel_close_orders()
@@ -582,11 +582,11 @@ while True:
     
             try:
                 place_active_buy_limit_tp_order = client.place_active_order(
-                side='Buy',\
+                side='Sell',\
                 symbol=symbol,\
                 order_type='Limit',\
-                price=sell_tp_price,\
-                qty=sell_position_size,\
+                price=buy_tp_price,\
+                qty=buy_position_size,\
                 time_in_force='GoodTillCancel',\
                 reduce_only=True,\
                 close_on_trigger=True)
@@ -597,19 +597,19 @@ while True:
                 pass
 
 
-    ''' Additional Short Entry Orders '''
+    ''' Additional Long Entry Orders '''
 
-    not_good_short_take_profit = sell_position_prce < ema_6_1_low_bybit
+    not_good_long_take_profit = buy_position_prce > ema_6_1_high_bybit
 
 
-    if not_good_short_take_profit == True:
+    if not_good_long_take_profit == True:
 
         print('├─────────────────────────────────────────────┤')
-        print('│  Sell position < EMA6 5m, need to place')
+        print('│  Buy position > EMA6 5m, need to place')
         print('│  additional order...')
 
 
-    if sell_position_size != 0 and sell_position_size < max_size and good_short_trade_conditions == True and not_good_short_take_profit == True:
+    if buy_position_size != 0 and buy_position_size < max_size and good_long_trade_conditions == True and not_good_long_take_profit == True:
 
         print('├─────────────────────────────────────────────┤')
         print('│  Placing order ⇲')
@@ -618,10 +618,10 @@ while True:
             cancel_entry_orders()
             time.sleep(0.01)
             place_entry_order = client.place_active_order(\
-            side='Sell',\
+            side='Buy',\
             symbol=symbol,\
             order_type='Limit',\
-            price=ask,\
+            price=bid,\
             qty=lot_trade_size,\
             time_in_force='GoodTillCancel',\
             reduce_only=False,\
@@ -650,14 +650,14 @@ while True:
 
     print('├─────────────────────────────────────────────┤')
 
-    if ask > ema_3_1_high_bybit:
-        print(Fore.RED +'│ Ask > EMA3 on 1m'+ Style.RESET_ALL)
+    if bid < ema_3_1_low_bybit:
+        print(Fore.RED +'│ Bid < EMA3 on 1m'+ Style.RESET_ALL)
     else:
-        print('│ Ask < EMA3 on 1m')
+        print('│ Bid > EMA3 on 1m')
 
-    if ask > ema_3_5_high_bybit:
-        print(Fore.RED +'│ Ask > EMA3 on 5m'+ Style.RESET_ALL)
+    if bid < ema_3_5_low_bybit:
+        print(Fore.RED +'│ Bid < EMA3 on 5m'+ Style.RESET_ALL)
     else:
-        print('│ Ask < EMA3 on 5m')
+        print('│ Bid > EMA3 on 5m')
 
     time.sleep(0.5)
