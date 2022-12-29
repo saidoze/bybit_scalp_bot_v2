@@ -521,8 +521,9 @@ while True:
         # percent_to_remove = 100 - tp_perc
         # sell_tp_price = round(sell_position_prce * percent_to_remove / 100,decimals)
 
-        # sell_tp_price = round(sell_position_prce-(ema_6_5_high_bybit - ema_6_5_low_bybit),decimals)
-        sell_tp_price = round(sell_position_prce-(ema_6_1_high_bybit - ema_6_1_low_bybit),decimals)
+        sell_tp_price = round(sell_position_prce-(ema_6_5_high_bybit - ema_6_5_low_bybit),decimals)
+        # Eg. APE: 3.618- (3.620 - 3.622) -> 3.616
+        # sell_tp_price = round(sell_position_prce-(ema_6_1_high_bybit - ema_6_1_low_bybit),decimals)
 
         tp_buy_order_prc = 0
         tp_buy_order_size = 0
@@ -536,7 +537,7 @@ while True:
             print(line_number, 'exeception: {}'.format(e))
             pass
 
-            
+        print('│ MA 6 High/Low on 5m:',ema_6_5_high_bybit,'/',ema_6_5_low_bybit)
         print('│  ',sell_tp_price)
         print('│  ',tp_buy_order_prc)
 
