@@ -467,9 +467,11 @@ while True:
     if enable_trading == '0':
         print(Fore.RED +'│             Trading: Disabled'+ Style.RESET_ALL)
 
-    profit = 100 - ((float(available_balance) - float(realised_pnl)) * 100 / float(available_balance))
-    profit = round(profit,2)
-
+    if float(available_balance) > 0:
+        profit = 100 - ((float(available_balance) - float(realised_pnl)) * 100 / float(available_balance))
+        profit = round(profit,2)
+    else:
+        profit = 'DivideByZero'
 
     print('│   Available Balance:',available_balance)
     print('│        Realized PnL:',realised_pnl)
